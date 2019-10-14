@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+'use strict';
+const express = require('express')
+const bodyParser = require('body-parser')
+const apiHandler = require('../controllers/controller')
+const pageLoader = require('../controllers/page-loader');
+const browserUtil = require('../util/browser-util');
+const app = express()
+const chalk = require('chalk')
+const path = require('path')
+const PORT = 4040;
+
+const binLink = __dirname.replace('/bin', '');
+var jsonParser = bodyParser.json() // to be used for parsing body
+
+global.appPublicPath = path.join(binLink, 'public');
+app.use((req, res, next)=>{
+    if(req){
+        req.appPublicPath = path.join(binLink, 'public');
+        global.apiBaseUrl = `${req.protocol}://${req.hostname}:${PORT}/api/`;
+    }
+    next();
+});
+app.get('/',(req, res)=>{
+    res.sendFile(path.join(req.appPublicPath, 'index.html'))
+});
+app.use('/api/*', jsonParser ,apiHandler.apiHandler);
+app.get('/edit/*', pageLoader)
+app.use('/__delshift', express.static(path.join(binLink, 'public'))); // hosting the delcms files
+/**
+ * live url is to load the page as it looks like
+ */
+app.use('/live',express.static(process.cwd()));
+
+app.listen(PORT, ()=> {
+    app.set('PORT', PORT);
+    console.log(chalk.green("Starting Inline CMS Backend at "), chalk.yellow(PORT));
+    console.log("App Serving from", chalk.green(__dirname));
+    browserUtil.openBrowser(`http://localhost:${PORT}`)
+});
+module.exports = app;

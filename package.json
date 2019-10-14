@@ -1,0 +1,25 @@
+{
+  "name": "delshift-inline-cms",
+  "version": "1.0.0",
+  "description": "Inline CMS for editing pages - backend",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "delshift-inline-cms": "bin/delshift-inline-cms",
+    "delcms": "bin/delshift-inline-cms"
+  },
+  "keywords": [
+    "inline",
+    "CMS"
+  ],
+  "author": "Abhishek Khuntia",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "cheerio": "^1.0.0-rc.3",
+    "express": "^4.17.1",
+    "open": "^6.4.0"
+  }
+}
