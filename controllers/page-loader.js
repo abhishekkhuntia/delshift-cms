@@ -6,7 +6,8 @@ const cwd = process.cwd();
 const fs = require('fs')
 const HTMLREGEX = /([A-Za-z\d]+)\.html$/
 function pageLoader(req, res){
-    let fileName = req.params[0];
+    let fileName = req.params[0],
+        cache = req.app.get('pageCache');
     if(fileName && 
        (req.method == appConstant.METHODS.GET)){
         let fileUrl = path.join(process.cwd(), fileName);
@@ -18,6 +19,7 @@ function pageLoader(req, res){
                 if(fs.existsSync(fileUrl)){
                     let htmlContent = fs.readFileSync(fileUrl)
                     if(htmlContent){
+                        cache.setValue(fileName, Date.now());
                         let delshiftLoaderScript = `${req.protocol}://${req.hostname}:${req.app.get('PORT')}/__delshift/main-script.js`;
                         let procesedHtml = pagesUtil.injectDELCMSScript(htmlContent, fileName, delshiftLoaderScript);
                         if(procesedHtml){

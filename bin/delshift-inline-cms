@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const apiHandler = require('../controllers/controller')
 const pageLoader = require('../controllers/page-loader');
 const browserUtil = require('../util/browser-util');
+const cacheManager = require('../memory-cache/memory-cache');
 const app = express()
 const chalk = require('chalk')
 const path = require('path')
@@ -31,6 +32,7 @@ app.use('/__delshift', express.static(path.join(binLink, 'public'))); // hosting
  * live url is to load the page as it looks like
  */
 app.use('/live',express.static(process.cwd()));
+app.set('pageCache', new cacheManager());
 
 app.listen(PORT, ()=> {
     app.set('PORT', PORT);

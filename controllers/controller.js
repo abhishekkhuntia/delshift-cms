@@ -1,11 +1,13 @@
 const pageController = require('./pages-controller');
+const browserController = require('./browser-controller');
 const ROUTES = {
     'getPagesList': pageController.getPagesList,
-    'updatePageContent': pageController.updatePageContent
+    'updatePageContent': pageController.updatePageContent,
+    'release-window': browserController.releaseBrowser
 }
 function apiHandler(req, res, next){
-    console.log("API handler got called >> ", req.params, req.method);
     let requestPath = req.params[0];
+    console.log("API -> ", requestPath);
     let routeObj = getRoutesMatchingHandler(requestPath, ROUTES);
     if(routeObj && typeof(routeObj.handler) == 'function'){
         routeObj.handler(req, res, next);
