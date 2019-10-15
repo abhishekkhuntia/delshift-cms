@@ -1,21 +1,81 @@
 <div id="__delshift-banner">
-    <h4>You are in editing mode. <a id="__delshift-live-anchor" target="_blank">Live Page</a> &nbsp; <a id="__delshift-close-anchor" title="Close banner">X</a></h4>
+    <h4>You are in editing mode. <a id="__delshift-live-anchor" target="_blank"><i class="fas fa-bolt"></i> Live Page</a> &nbsp; <a id="__delshift-close-anchor" title="Close banner"><i class="fas fa-times"></i></a></h4>
 </div>
 <div id="__delshift-loader">
 </div>
 <div id="__delshift-action-div">
-    <button id="__del-action-init" title="Save content!" class="__delshift-fab-btn">+</button>
-
-    <style>
+    <external-script class="__del-hide" type="script" rel="https://kit.fontawesome.com/8e915518ac.js"></external-script>
+    <external-script class="__del-hide" type="stylesheet" rel="https://fonts.googleapis.com/css?family=Mansalva&amp;display=swap"></external-script>
+    <button id="__del-action-init" title="Save content!" class="__delshift-fab-btn"><i class="fas fa-save"></i></button>
+</div>
+<div id="__delshift-modal" class="__del-hide">
+</div>
+<template id="__delshift-image-change" class="__del-hide">
+    <h4>Please select an image file to use.<h4>
+    <form name="image-form">
+        <!--<input type="file" name="image-select"/> -->
+        <input type="text" name="image-path" placeholder="Paste the image URL";/>
+        <input type="file" name="target-select">
+        <input type="submit">Submit</button>
+    </form>
+</template>
+<div id="__delshift-modal-content" class="__del-modal __del-hide">    
+</div>
+<style>
+    #__delshift-modal{
+        position: fixed;
+        z-index: 9999;
+        background: rgba(72, 72, 72, 0.7);
+        top: 0px;
+        left: 0px;
+        height: 100vh;
+        width: 100%;
+    }
+    .__del-modal{
+        background-color: #fff;
+        height: 50vh;
+        position: fixed;
+        top: 25vh;
+        box-sizing: border-box;
+        width: 50%;
+        z-index: 9999;
+        left: 25%;
+        border-radius: 10px;
+        overflow: auto;
+        box-shadow: 0 0 15px #484848;
+    }
         #__delshift-close-anchor{
             float: right;
+        }
+        #__delshift-banner h4{
+            font-weight: 300;
+            margin: 0px;
+            padding: 0px;
+            color: #fff;
+            font-family: 'Mansalva', cursive, Segoe UI,SegoeUI,"Helvetica Neue",Helvetica,Arial,sans-serif;
+        }
+        #__delshift-live-anchor{
+            color: #484848;
+            transition: 0.2s;
+        }
+        #__delshift-live-anchor .fa-bolt{
+            transition: 0.2s;
+        }
+        #__delshift-live-anchor:hover .fa-bolt{
+            color: #f90;
+            text-shadow: 0 0 5px #484848;
         }
         #__delshift-banner{
             position: fixed;
             top: 0px;
             left: 0px;
-            height: 20px;
+            height: auto;
             width: 100%;
+            clear: both;
+            padding: 20px;
+            z-index: 9999;
+            background: #66ccff;
+            box-shadow: 0 0 5px #484848;
         }
         #__delshift-loader{
             position: fixed;
@@ -63,4 +123,3 @@
             display: none !important;
         }
     </style>
-</div>

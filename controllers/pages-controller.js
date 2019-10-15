@@ -1,6 +1,6 @@
 const path = require('path');
 const appConstant = require('../app-constants');
-const pagesUtils = require('../util/pages-util');
+const pagesUtils = require('../util/pages-util')
 
 const fs = require('fs');
 let cwdFolder = process.cwd();
@@ -27,7 +27,6 @@ function updatePageContent(req, res, next){
     // console.log("REQUEST >>", req.body);
     if(req.method && 
        (req.method == appConstant.METHODS.PUT)){
-        console.log(req);
         const {fileName,updatedContent} = req.body;
         let filePath = path.join(cwdFolder, fileName);
         if(fileName && updatedContent){

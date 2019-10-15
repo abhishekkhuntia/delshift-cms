@@ -1,5 +1,23 @@
 (function(){
     console.log("Initializing Delshift cms");
+    let duplicateTab = false;
+    function attachImageModalElems(modalElem){
+        if(modalElem){
+            var fileInput = modalElem.querySelector('input[name="image-select"]'),
+                targetInput = modalElem.querySelector('input[name="target-select"]');
+            if(fileInput && targetInput){
+                fileInput.addEventListener('change', (e)=> {
+                    console.log("FILE INPUT CHANGE >> ", e);
+                });
+                targetInput.addEventListener('change', (e)=> {
+                    console.log("FILE INPUT CHANGE >> ", e);
+                });
+            }
+        }
+        setTimeout(()=>{
+            this.closeDialog({firstName: 'Abhishek', lastName: 'Khuntia'});
+        }, 5000);  
+    }
     function addCMSActionButtons(){
         var scriptEle = document.getElementById('__delshift-script');
         if(scriptEle){
@@ -8,9 +26,37 @@
             buttonEle.innerHTML = scriptEle.innerHTML;
             document.body.appendChild(buttonEle);
             window.__delLoader = document.getElementById('__delshift-loader');
-            toggleLoader(false);
         }
         console.log("Attaching the action button");
+    }
+    function setLiveAnchor(){
+        var liveAnchor = document.getElementById('__delshift-live-anchor'),
+            liveUrl = window.location.href.replace(new RegExp('edit/'), (window.__delshift.livePrefix+'/'));
+            if(liveAnchor){
+                liveAnchor.href = liveUrl;
+            }
+    }
+    function addExternalScripts(){
+        var externalScripts = document.querySelectorAll('external-script');
+        for(var i=0; i< externalScripts.length; i++){
+            if(externalScripts[i].hasAttribute('rel')){
+                var extSrcType = externalScripts[i].getAttribute('type'),
+                    scriptEle;
+                switch(extSrcType){
+                    case 'stylesheet':
+                    scriptEle = document.createElement('link'),
+                    scriptEle.setAttribute('href', externalScripts[i].getAttribute('rel')),
+                    scriptEle.setAttribute('rel', 'stylesheet');
+                    break;
+                    case 'script':
+                    scriptEle = document.createElement('script'),
+                    scriptEle.setAttribute('src', externalScripts[i].getAttribute('rel'));
+                    break;
+                }
+                document.head.appendChild(scriptEle);
+                externalScripts[i].parentElement.removeChild(externalScripts[i]);
+            }
+        }
     }
     function addEditablesInPage(){
         var editables = document.querySelectorAll('h1, h2,  h3, h4, h5, h6, p, a, span');
@@ -22,19 +68,10 @@
                         if(editables[i].firstElementChild && editables[i].firstElementChild.hasAttribute('__del-editable')){
                             editables[i].firstElementChild.removeAttribute('__del-editable');
                         }
-                        editables[i]._attached = true;
+                        // editables[i]._attached = true;
                         if(editables[i].getAttribute('contenteditable')){
                             editables[i].setAttribute('__del-contenteditable-true', true);
                         }
-                        editables[i].addEventListener('click', (e)=> {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            console.log("Editable elemnt >> ", e); 
-                            e.target.setAttribute('contenteditable', true);
-                            setTimeout(()=> {
-                                e.target.focus();
-                            }, 50);
-                        });
                         editables[i].addEventListener('blur', e=> {
                             if(e.target){
                                 e.target.removeAttribute('contenteditable');
@@ -44,11 +81,40 @@
                 }
             }
         }
+        document.addEventListener('click', (e)=> {
+            if(e.target && e.target.closest('[__del-editable]')){
+                var _target = e.target.closest('[__del-editable]');
+                if(_target){
+                    e.preventDefault();
+                    e.stopPropagation();
+                    _target.setAttribute('contenteditable', true);
+                    setTimeout(()=> {
+                        _target.focus();
+                    }, 50);
+                }
+            }
+        },{capture: true});
 
+    }
+    function attachCloseBannerEvent(){
+        var bannerEle = document.getElementById('__delshift-banner'),
+            closeBtn = document.getElementById('__delshift-close-anchor');
+        if(bannerEle && closeBtn){
+            closeBtn.addEventListener('click', (e)=> {
+                if(e){
+                    bannerEle.classList.add('__del-hide');
+                }
+            });
+        }
     }
     document.addEventListener('DOMContentLoaded',()=> {
         addEditablesInPage();
         addCMSActionButtons();
+        toggleLoader(false);
+        // adding external - scripts
+        addExternalScripts();
+        setLiveAnchor();
+        attachCloseBannerEvent();
         
         var actionButtonEle = document.getElementById('__del-action-init');
         if(actionButtonEle){
@@ -59,6 +125,30 @@
                 }
             });
         }
+        var imageElems = document.querySelectorAll('img');
+        for(let i=0; i< imageElems.length; i++){
+            imageElems[i].addEventListener('click', (e)=> {
+                var currentImage = e.target.getAttribute('src');
+                var dialogRef = new DialogService();
+                dialogRef.openDialog({templateId:'__delshift-image-change', attached: attachImageModalElems, softClose: true})
+                .then(data=> {
+                    console.log("DIALOG SERVICE >>", data);
+                })
+                .catch(error => {
+                    console.error("DIALOG SERVICE >> ", error);
+                });              
+            });
+        }
+    });
+    window.addEventListener('beforeunload', (event)=> {
+        if(!duplicateTab){
+            serviceRequest({
+                url: 'release-window',
+                method: 'POST',
+                contentHeader: "application/json",
+                body: JSON.stringify({fileName: window.__delshift.fileName})
+            });
+        }
     });
     function updateContent(){
         toggleLoader(true, 'Updating page cont');
@@ -67,8 +157,7 @@
             method: 'PUT',
             contentHeader: "application/json",
             body: JSON.stringify({fileName: window.__delshift.fileName, updatedContent: preProcessHTMLContent(document.body.innerHTML)})
-        })
-        .then(response => {
+        }).then(response => {
             console.log("updated page content");
         })
         .then(()=> {
@@ -105,28 +194,82 @@
             return div.innerHTML;
         }
     }
-    
-}());
-const serviceRequest = option => {
-    return new Promise((resolve, reject) => {
-        if(!option.url.startsWith('http')){
-            option.url = `${window.__delshift.apiBaseUrl}${option.url}`;
+    // DIALOG SERVICE - PRIVATE
+    const DialogService = (function(){
+        var dialogRef;
+        function dialogService(){
+            this.modalElem = document.getElementById('__delshift-modal-content');
+            this.modalShade = document.getElementById('__delshift-modal');
         }
-        let xhr = new XMLHttpRequest();
-        xhr.open(option.method || 'GET', option.url)
-        xhr.setRequestHeader("Content-Type", option.contentHeader || "application/x-www-form-urlencoded");
-        xhr.onload = () => {
-            if(xhr.status >=200 && xhr.status < 400){
-                try{
-                    resolve(JSON.parse(xhr.response));
-                } catch{
-                    resolve(xhr.response);
+        dialogService.prototype.openDialog = function(option){
+            return new Promise((resolve, reject)=> {
+                if(dialogRef){
+                    reject('DIALOG-OPEN-STATE');
+                } else if(option.templateId){
+                    var template = document.getElementById(option.templateId);
+                    if(!template){
+                        reject('TEMPLATE-NOT-FOUND');
+                    } else if(this.modalElem){
+                        this.modalElem.innerHTML = template.innerHTML;
+                        this.modalElem.classList.remove('__del-hide');
+                        this.modalShade.classList.remove('__del-hide');
+                        if(option.attached && typeof(option.attached) == 'function'){
+                            option.attached.call(this, this.modalElem);
+                        }
+                        var _self = this;
+                        if(option.softClose){
+                            if(!this.modalShade.__delAttached){
+                                this.modalShade.__delAttached = true;
+                                this.modalShade.addEventListener('click', _self.closeDialog.bind(this));
+                            }
+                        } else{
+                            this.modalShade.__delAttached = false;
+                            this.modalShade.removeEventListener('click', this.closeDialog);
+                        }
+                        dialogRef = resolve;
+                    } else{
+                        reject('MODAL-ELEM-MISSING');
+                    }
                 }
-            } else{
-                reject(xhr.statusText);
+            });
+        }
+        dialogService.prototype.closeDialog = function(data){
+            if(this.modalElem && this.modalShade){
+                this.modalShade.classList.add('__del-hide');
+                this.modalElem.classList.add('__del-hide');
+                this.modalElem.innerHTML = '';
+                if(typeof(dialogRef) == 'function'){
+                    dialogRef({status: 'OK', data});
+                    dialogRef = undefined;
+                }
             }
-        };
-        xhr.onerror = () => reject(xhr.statusText);
-        xhr.send(option.body);
-    });
-};
+        }
+        return dialogService;
+    }());
+    // service reguest as promise
+    const serviceRequest = option => {
+        return new Promise((resolve, reject) => {
+            if(!option.url.startsWith('http')){
+                option.url = `${window.__delshift.apiBaseUrl}${option.url}`;
+            }
+            let xhr = new XMLHttpRequest();
+            xhr.open(option.method || 'GET', option.url)
+            xhr.setRequestHeader("Content-Type", option.contentHeader || "application/x-www-form-urlencoded");
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.onload = () => {
+                if(xhr.status >=200 && xhr.status < 400){
+                    try{
+                        resolve(JSON.parse(xhr.response));
+                    } catch{
+                        resolve(xhr.response);
+                    }
+                } else{
+                    reject(xhr.statusText);
+                }
+            };
+            xhr.onerror = () => reject(xhr.statusText);
+            xhr.send(option.body);
+        });
+    };
+}());
+

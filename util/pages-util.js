@@ -41,7 +41,7 @@ function injectDELCMSScript(htmlContent, fileName, scriptPath){
             let actionButtonScript = global.actionButtonScript || getActionButtonScriptContent();
             let $ = cheerio.load(htmlContent, { decodeEntities: true });
             let head = $("head");
-            let cmsbootstrap = $(`<script type="text/javascript">window.__delshift = {fileName: "${fileName}", apiBaseUrl: "${global.apiBaseUrl}"};</script>`);
+            let cmsbootstrap = $(`<script type="text/javascript">window.__delshift = {fileName: "${fileName}", apiBaseUrl: "${global.apiBaseUrl}", livePrefix: 'live'};</script>`);
             let delshiftscript = $(`<script type="text/javascript" src="${scriptPath}"></script>`);
             let actionEleScript = $(`<script type="text/x-del-cms-tmpl" id="__delshift-script">${actionButtonScript}</script>`);
             head.append(delshiftscript);
