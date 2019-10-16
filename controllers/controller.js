@@ -1,9 +1,11 @@
 const pageController = require('./pages-controller');
 const browserController = require('./browser-controller');
+const fs = require('fs');
 const ROUTES = {
     'getPagesList': pageController.getPagesList,
     'updatePageContent': pageController.updatePageContent,
-    'release-window': browserController.releaseBrowser
+    'release-window': browserController.releaseBrowser,
+    'directory-map': pageController.getDirectoryMap
 }
 function apiHandler(req, res, next){
     let requestPath = req.params[0];

@@ -47,7 +47,25 @@ function updatePageContent(req, res, next){
         res.status(404).json({data: `Route Not found  E_2000`});
     }
 }
+function getDirectoryMap(req, res, next){
+    if(req.method &&
+       req.method == appConstant.METHODS.GET){
+        try{
+            let dirMap = pagesUtils.getSiteMap(process.cwd(),'root', '.') || {};
+            res.json({status: appConstant.STATUS.OK, data: dirMap}).status(200);
+        }
+        catch(err){
+            console.error(err);
+            res.status(500).json({data: `Unexpected error occurred!`});    
+        }
+    } else{
+        let errorMessage = appConstant.ERRORS.E_2000;
+        console.error(errorMessage);
+        res.status(404).json({data: `Route Not found  E_2000`});
+    }
+}
 module.exports = {
     getPagesList: getPagesList,
-    updatePageContent: updatePageContent
+    updatePageContent: updatePageContent,
+    getDirectoryMap: getDirectoryMap
 }

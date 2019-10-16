@@ -71,8 +71,36 @@ function updatePageBody(filePath, bodyContent){
         return;
     }
 }
+function getSiteMap(srcPath,fileName, baseUrl){
+    var op = {};
+    if(fs.existsSync(srcPath)){
+        if(fs.statSync(srcPath).isDirectory()){
+            let contents = fs.readdirSync(srcPath);
+            let tempOp = {
+                dir: fileName || 'root', 
+                baseUrl: '.',
+                values:[]};
+            if(fileName != 'root'){
+                tempOp.baseUrl = baseUrl+'/'+fileName;
+            }
+            if(contents && contents.length){
+                for(var i=0; i< contents.length; i++){
+                    var _temp = getSiteMap(`${srcPath}/${contents[i]}`, contents[i], tempOp.baseUrl);
+                    if(_temp){
+                        tempOp.values.push(_temp);
+                    }
+                }
+            }
+            op = tempOp;
+        } else{
+            return fileName;
+        }
+    }
+    return op;
+}
 module.exports = {
     getHTMLPagesInDirectory: getHTMLPagesInDirectory,
     injectDELCMSScript: injectDELCMSScript,
-    updatePageBody: updatePageBody
+    updatePageBody: updatePageBody,
+    getSiteMap: getSiteMap
 }

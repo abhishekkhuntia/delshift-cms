@@ -1,22 +1,90 @@
 (function(){
     console.log("Initializing Delshift cms");
     let duplicateTab = false;
+    const imageRegex = new RegExp('\.(gif|jpg|jpeg|png)$');
     function attachImageModalElems(modalElem){
         if(modalElem){
-            var fileInput = modalElem.querySelector('input[name="image-select"]'),
-                targetInput = modalElem.querySelector('input[name="target-select"]');
-            if(fileInput && targetInput){
-                fileInput.addEventListener('change', (e)=> {
-                    console.log("FILE INPUT CHANGE >> ", e);
-                });
-                targetInput.addEventListener('change', (e)=> {
-                    console.log("FILE INPUT CHANGE >> ", e);
+            var refElems = modalElem.querySelectorAll('[ref]');
+            if(refElems.length){
+                for(var i=0; i< refElems.length; i++){
+                    this[refElems[i].getAttribute('ref')] = refElems[i];
+                }
+            }
+            if(this.heading){
+                this.heading.innerText = 'Loading directory map!';
+                getDirectoryMap()
+                .then(response=> {
+                    this.heading.innerText = 'Please select an image';
+                    console.log("Response from getDirectoryMap >> ", response);
+                    if(response.status && response.status == 'OK'){
+                        var data = response.data || {};
+                        if(Object.keys(data).length){
+                            generateGallery.call(this, data);
+                            var galleryImages = this.modalElem.querySelectorAll('.__delshift-gallery-item img');
+                            for(var k=0; k< galleryImages.length; k++){
+                                galleryImages[k].addEventListener('click', (e)=> {
+                                    var imgObj = {
+                                        src: e.target.getAttribute('src'),
+                                        alt: e.target.getAttribute('alt')
+                                    };
+                                    this.closeDialog(imgObj);
+                                });
+                            }
+                        } else{
+                            this.heading.innerText = 'It seems there aren\'t any images available in the project';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching directory map for the project");
                 });
             }
         }
-        setTimeout(()=>{
-            this.closeDialog({firstName: 'Abhishek', lastName: 'Khuntia'});
-        }, 5000);  
+    }
+    function filterImages(dirMap, baseUrl){
+        var op = [];
+        if(dirMap && typeof(dirMap) =='object' && dirMap.dir){
+            if(dirMap.values && dirMap.values.length){
+                dirMap.values.forEach(_dir => {
+                    var _op = filterImages(_dir, dirMap.baseUrl);
+                    if(_op){
+                        if(_op.constructor == Array){
+                            op = [...op, ..._op];
+                        } else{
+                            op.push(_op);
+                        }
+                        
+                    }
+                });
+            }
+            return op;
+        } else if(typeof(dirMap) == 'string' && imageRegex.test(dirMap)){
+            return {
+                path: `${baseUrl}/${dirMap}`,
+                fileName: dirMap
+            };
+        } else{
+            return;
+        }
+    }
+    function generateGallery(dirData){
+        if(this.galleryImages){
+            this.galleryImages.innerHTML = '';
+            var images = filterImages(dirData);
+            if(images.length){
+                images.forEach(image => {
+                    var liElem = document.createElement('li');
+                    liElem.classList.add('__delshift-gallery-item');
+                    liElem.innerHTML = `<img src="${image.path}">`;
+                    this.galleryImages.appendChild(liElem);
+                });
+            }
+        }
+    }
+    function getDirectoryMap(){
+        return serviceRequest({
+            url: 'directory-map'
+        });
     }
     function addCMSActionButtons(){
         var scriptEle = document.getElementById('__delshift-script');
@@ -35,6 +103,10 @@
             if(liveAnchor){
                 liveAnchor.href = liveUrl;
             }
+        var homeAnchor = document.getElementById('__delshift-home-link');
+        if(homeAnchor){
+            homeAnchor.setAttribute('href', `${window.location.protocol}//${window.location.host}`)
+        }            
     }
     function addExternalScripts(){
         var externalScripts = document.querySelectorAll('external-script');
@@ -62,7 +134,7 @@
         var editables = document.querySelectorAll('h1, h2,  h3, h4, h5, h6, p, a, span');
         if(editables.length){
             for(var i=0; i< editables.length; i++){
-                if(!editables[i]._attached){
+                if(!editables[i]._attached && !editables[i].querySelector("img")){
                     if(!editables[i].closest('[__del-editable]') || (editables[i].parentElement != editables[i].closest('[__del-editable]'))){
                         editables[i].setAttribute('__del-editable', true);
                         if(editables[i].firstElementChild && editables[i].firstElementChild.hasAttribute('__del-editable')){
@@ -128,11 +200,15 @@
         var imageElems = document.querySelectorAll('img');
         for(let i=0; i< imageElems.length; i++){
             imageElems[i].addEventListener('click', (e)=> {
-                var currentImage = e.target.getAttribute('src');
                 var dialogRef = new DialogService();
                 dialogRef.openDialog({templateId:'__delshift-image-change', attached: attachImageModalElems, softClose: true})
-                .then(data=> {
-                    console.log("DIALOG SERVICE >>", data);
+                .then(response=> {
+                    console.log("DIALOG SERVICE >>", response.data);
+                    if(response.data){
+                        for(var i in response.data){
+                            e.target.setAttribute(i, response.data[i]);
+                        }
+                    }
                 })
                 .catch(error => {
                     console.error("DIALOG SERVICE >> ", error);
@@ -227,6 +303,7 @@
                             this.modalShade.removeEventListener('click', this.closeDialog);
                         }
                         dialogRef = resolve;
+                        document.body.style.overflow = "hidden";
                     } else{
                         reject('MODAL-ELEM-MISSING');
                     }
@@ -235,6 +312,7 @@
         }
         dialogService.prototype.closeDialog = function(data){
             if(this.modalElem && this.modalShade){
+                document.body.style.overflow = "";
                 this.modalShade.classList.add('__del-hide');
                 this.modalElem.classList.add('__del-hide');
                 this.modalElem.innerHTML = '';
