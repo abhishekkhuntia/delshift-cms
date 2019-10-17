@@ -1,7 +1,19 @@
 (function(){
-    console.log("Initializing Delshift cms");
+    console.log(`
+    ____  _____ _     ____  _   _ ___ _____ _____            ____ __  __ ____  
+    |  _ \| ____| |   / ___|| | | |_ _|  ___|_   _|          / ___|  \/  / ___| 
+    | | | |  _| | |   \___ \| |_| || || |_    | |    _____  | |   | |\/| \___ \ 
+    | |_| | |___| |___ ___) |  _  || ||  _|   | |   |_____| | |___| |  | |___) |
+    |____/|_____|_____|____/|_| |_|___|_|     |_|            \____|_|  |_|____/ 
+                                                                                
+                                                                                `);
     let duplicateTab = false;
     const imageRegex = new RegExp('\.(gif|jpg|jpeg|png)$');
+    function activatePopper(){
+        document.addEventListener('selectionchange', (evt)=> {
+            console.log("SELECTION CHANGE >> ", evt);
+        });
+    }
     function attachImageModalElems(modalElem){
         if(modalElem){
             var refElems = modalElem.querySelectorAll('[ref]');
@@ -187,6 +199,7 @@
         addExternalScripts();
         setLiveAnchor();
         attachCloseBannerEvent();
+        activatePopper();
         
         var actionButtonEle = document.getElementById('__del-action-init');
         if(actionButtonEle){
