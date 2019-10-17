@@ -11,7 +11,7 @@ const chalk = require('chalk')
 const path = require('path')
 const PORT = 4040;
 
-const binLink = __dirname.replace('/bin', '');
+const binLink = __dirname.replace('bin', '');
 var jsonParser = bodyParser.json() // to be used for parsing body
 
 global.appPublicPath = path.join(binLink, 'public');

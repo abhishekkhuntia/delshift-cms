@@ -2,10 +2,10 @@ const cheerio = require('cheerio')
 const path = require('path')
 const fs = require('fs');
 const appConstants = require('../app-constants');
-const binLink = __dirname.replace('/util', '');
+const binLink = __dirname.replace('util', '');
 
 function getActionButtonScriptContent(){
-    let tempPath = path.join(`${binLink}/public`, appConstants.CLIENT_SCRIPTS.TEMPLATE);
+    let tempPath = path.join(path.join(binLink, 'public'), appConstants.CLIENT_SCRIPTS.TEMPLATE);
     if(fs.existsSync(tempPath)){
         let fileContent = fs.readFileSync(tempPath);
         global.actionButtonScript = fileContent;
