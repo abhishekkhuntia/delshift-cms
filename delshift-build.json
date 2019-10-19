@@ -1,0 +1,10 @@
+{
+    "scriptPath": "scripts",
+    "preprendScripts":[
+        {
+            "name": "popper",
+            "path": "popper.min.js",
+            "type": "javascript"
+        }
+    ]
+}

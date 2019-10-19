@@ -9,11 +9,22 @@ const cacheManager = require('../memory-cache/memory-cache');
 const app = express()
 const chalk = require('chalk')
 const path = require('path')
-const PORT = 4040;
+const PORT = 4040
+const fs = require('fs');
 
 const binLink = __dirname.replace('bin', '');
 var jsonParser = bodyParser.json() // to be used for parsing body
 
+try{
+    let config = fs.readFileSync(path.join(binLink,'delshift-build.json'),{encoding: 'utf-8'});
+    if(config){
+        global.appConfig = JSON.parse(config);
+        console.log("APP CONFIG >> ", global.appConfig);
+    }
+} catch(err){
+    console.log(chalk.red('delshift-build.json, unable to load'));
+    process.exit(0);
+}
 global.appPublicPath = path.join(binLink, 'public');
 app.use((req, res, next)=>{
     if(req){

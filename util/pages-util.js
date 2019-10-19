@@ -18,7 +18,6 @@ function getHTMLPagesInDirectory(dir, editUrlPreffix){
     let htmlRegex = /([A-Za-z\d]+)\.html$/;
     let output = [];
     if(fs.statSync(dir).isDirectory()){
-
       let srcFiles = fs.readdirSync(dir);
       if(srcFiles && srcFiles.length){
         for(var n=0; n < srcFiles.length; n++){
@@ -47,12 +46,35 @@ function injectDELCMSScript(htmlContent, fileName, scriptPath){
             head.append(delshiftscript);
             head.append(cmsbootstrap);
             head.append(actionEleScript);
+            let scripts = genConfigBasedContent($);
+            scripts.forEach(srcEle=> {
+                head.append(srcEle);
+            });
             return $.html();
         }   
         catch(err){
+            console.log("Error injecting scripts >> ", err);
             return;
         }     
     }
+}
+function genConfigBasedContent(_$){
+    let op = [];
+    if(global.appConfig && _$){
+        let prePrendScripts = global.appConfig.preprendScripts || [];
+        prePrendScripts.forEach(script => {
+            try{
+                let scriptContent = fs.readFileSync(path.join(binLink, path.join(global.appConfig.scriptPath), script.path));
+                if(script.type == 'javascript'){
+                    let _script = _$(`<script type="text/javascript">${scriptContent}</script>`);
+                    op.push(_script);
+                }
+            } catch(err){
+                console.error("Error loading ", err);
+            }
+        });
+    }
+    return op;
 }
 function updatePageBody(filePath, bodyContent){
     try{

@@ -19,6 +19,9 @@
 </template>
 <div id="__delshift-modal-content" class="__del-modal __del-hide">    
 </div>
+<div id="__delshift-popper-div" class="__del-hide">
+    <a ref="editLink" title="Edit link"><i class="fas fa-link"></i></a>
+</div>
 <style>
     #__delshift-home-link{
         color: #48488;
