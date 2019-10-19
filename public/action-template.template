@@ -1,23 +1,23 @@
-<div id="__delshift-banner">
+<div id="__delshift-banner" class="__delshift-action-allowed">
     <h4>
     <a id="__delshift-home-link"><i class="fas fa-home"></i></a> &nbsp;
     <span>You are in editing mode.</span>
     <a id="__delshift-live-anchor" target="_blank"><i class="fas fa-bolt"></i> Live Page</a> &nbsp; &nbsp; <a id="__delshift-close-anchor" title="Close banner"><i class="fas fa-times"></i></a></h4>
 </div>
-<div id="__delshift-loader">
+<div id="__delshift-loader" class="__delshift-action-allowed">
 </div>
-<div id="__delshift-action-div">
+<div id="__delshift-action-div" class="__delshift-action-allowed">
     <external-script class="__del-hide" type="script" rel="https://kit.fontawesome.com/8e915518ac.js"></external-script>
     <external-script class="__del-hide" type="stylesheet" rel="https://fonts.googleapis.com/css?family=Mansalva&amp;display=swap"></external-script>
     <button id="__del-action-init" title="Save content!" class="__delshift-fab-btn"><i class="fas fa-save"></i></button>
 </div>
-<div id="__delshift-modal" class="__del-hide">
+<div id="__delshift-modal" class="__del-hide __delshift-action-allowed">
 </div>
 <template id="__delshift-image-change" class="__del-hide">
     <h4 ref="heading">Please select an image in your project file system.</h4>
     <ul ref="galleryImages"></ul>
 </template>
-<div id="__delshift-modal-content" class="__del-modal __del-hide">    
+<div id="__delshift-modal-content" class="__del-modal __del-hide __delshift-action-allowed">    
 </div>
 <div id="__delshift-popper-div" class="__del-hide">
     <a ref="editLink" title="Edit link"><i class="fas fa-link"></i></a>

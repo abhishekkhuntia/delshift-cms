@@ -176,9 +176,46 @@
                         _target.focus();
                     }, 50);
                 }
+            } else if(e.target.closest('.__delshift-action-allowed')){
+                return true;
+            } else if(e.target.nodeName == 'IMG'){
+                    initiateImageClick(e);
+            }else{
+                e.preventDefault();
+                e.stopPropagation();
+                // check if there an image which is getting under the anchor and open image edit
+                checkForImagesInside(e.target);
             }
         },{capture: true});
 
+    }
+    function checkForImagesInside(ele){
+        if(ele && ele instanceof HTMLElement){
+            if(ele.closest('a')){
+                ele = ele.closest('a');
+            }
+            var image = ele.querySelector('img');
+            if(image){
+                image.click();
+            }
+        }
+    }
+    function initiateImageClick(e){
+        e.stopPropagation();
+        e.preventDefault();
+        var dialogRef = new DialogService();
+            dialogRef.openDialog({templateId:'__delshift-image-change', attached: attachImageModalElems, softClose: true})
+                .then(response=> {
+                    console.log("DIALOG SERVICE >>", response.data);
+                    if(response.data){
+                        for(var i in response.data){
+                            e.target.setAttribute(i, response.data[i]);
+                        }
+                    }
+                })
+            .catch(error => {
+                console.error("DIALOG SERVICE >> ", error);
+            });
     }
     function attachCloseBannerEvent(){
         var bannerEle = document.getElementById('__delshift-banner'),
@@ -208,24 +245,6 @@
                 if(_promRes){
                     updateContent()
                 }
-            });
-        }
-        var imageElems = document.querySelectorAll('img');
-        for(let i=0; i< imageElems.length; i++){
-            imageElems[i].addEventListener('click', (e)=> {
-                var dialogRef = new DialogService();
-                dialogRef.openDialog({templateId:'__delshift-image-change', attached: attachImageModalElems, softClose: true})
-                .then(response=> {
-                    console.log("DIALOG SERVICE >>", response.data);
-                    if(response.data){
-                        for(var i in response.data){
-                            e.target.setAttribute(i, response.data[i]);
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error("DIALOG SERVICE >> ", error);
-                });              
             });
         }
     });
@@ -289,6 +308,7 @@
         function dialogService(){
             this.modalElem = document.getElementById('__delshift-modal-content');
             this.modalShade = document.getElementById('__delshift-modal');
+            this.resolveRef = undefined;
         }
         dialogService.prototype.openDialog = function(option){
             return new Promise((resolve, reject)=> {
@@ -315,7 +335,7 @@
                             this.modalShade.__delAttached = false;
                             this.modalShade.removeEventListener('click', this.closeDialog);
                         }
-                        dialogRef = resolve;
+                        this.resolveRef = resolve;
                         document.body.style.overflow = "hidden";
                     } else{
                         reject('MODAL-ELEM-MISSING');
@@ -329,9 +349,9 @@
                 this.modalShade.classList.add('__del-hide');
                 this.modalElem.classList.add('__del-hide');
                 this.modalElem.innerHTML = '';
-                if(typeof(dialogRef) == 'function'){
-                    dialogRef({status: 'OK', data});
-                    dialogRef = undefined;
+                if(typeof(this.resolveRef) == 'function'){
+                    this.resolveRef({status: 'OK', data});
+                    this.resolveRef = undefined;
                 }
             }
         }
