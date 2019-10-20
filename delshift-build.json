@@ -5,6 +5,11 @@
             "name": "popper",
             "path": "popper.min.js",
             "type": "javascript"
+        },
+        {
+            "name": "range-ref",
+            "path": "range-ref.js",
+            "type": "javascript"
         }
     ]
 }

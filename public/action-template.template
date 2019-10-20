@@ -17,12 +17,71 @@
     <h4 ref="heading">Please select an image in your project file system.</h4>
     <ul ref="galleryImages"></ul>
 </template>
+<template id="__delshift-anchor-change" class="__del-hide">
+    <h4 ref="heading">Please select a page.</h4>
+    <div class="__delshift-horizontal-form">
+        <input type="text" ref="customUrl" name="customUrl" placeholder="http:// or https://"/>
+        <button ref="doneBtn">Done</button>
+    </div>
+    <p style="margin: 0px;">OR</p>
+    <ul ref="galleryLinks"></ul>
+</template>
 <div id="__delshift-modal-content" class="__del-modal __del-hide __delshift-action-allowed">    
 </div>
-<div id="__delshift-popper-div" class="__del-hide">
+<div id="__delshift-popper-div" class="__del-hide __delshift-action-allowed">
     <a ref="editLink" title="Edit link"><i class="fas fa-link"></i></a>
+    <div x-arrow></div>
 </div>
 <style>
+    [ref="galleryLinks"]{
+        padding: 0px;
+    }
+    .__delshift-horizontal-form{
+        display: flex;
+    }
+    .__delshift-horizontal-form input[type="text"]{
+        width: 70%;
+        border: 1px solid #484848;
+        padding: 10px;
+    }
+    .__delshift-horizontal-form button{
+        padding: 0px;
+        background: #484848;
+        color: #fff;
+        border-radius: 0px;
+        margin: 0px;
+        width: 100px;
+        height: 43px;
+        transition: 0.2s;
+    }
+    .__delshift-horizontal-form button:hover {
+        border: 5px solid #f90;
+    }
+    #__delshift-popper-div{
+        padding: 10px;
+        background: #484848;
+        border-radius: 10px;
+        color: #fff;
+        height: 42px;
+        width: auto;
+        z-index: 9999;
+    }
+    [x-arrow] {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        background-color: #484848;
+        transform: rotate(45deg);
+        z-index: -1;
+    }
+    [x-placement="bottom"]{
+        margin-top: -7px;
+        top: 0;
+    }
+    [x-placement="top"]{
+        margin-bottom: -7px;
+        bottom: 0;
+    }
     #__delshift-home-link{
         color: #48488;
         transition: 0.2s;

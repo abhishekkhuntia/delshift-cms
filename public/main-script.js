@@ -9,10 +9,116 @@
                                                                                 `);
     let duplicateTab = false;
     const imageRegex = new RegExp('\.(gif|jpg|jpeg|png)$');
+    const htmlRegex = new RegExp('\.(html|htm)');
     function activatePopper(){
-        document.addEventListener('selectionchange', (evt)=> {
-            console.log("SELECTION CHANGE >> ", evt);
-        });
+        if(__delRangeRef && Popper){
+            var popperRange = new __delRangeRef(),
+                popperDiv = document.getElementById('__delshift-popper-div'),
+                popperInstance = new Popper(popperRange, popperDiv, {
+                    placement: "top",
+                    modifiers: { offset: { offset: "0,5" } },
+                });
+            var refElems = popperDiv.querySelectorAll('[ref]');
+            for(var i=0; i< refElems.length; i++){
+                this[refElems[i].getAttribute('ref')] = refElems[i];
+            }
+            if(this.editLink){
+                this.editLink.addEventListener('click', (e)=>{
+                    if(this.editLink.__delTarget){
+                        // openning the dialog
+                        openEditLinkDialog(this.editLink.__delTarget, this.editLink);
+                    }
+                });
+            }
+            document.addEventListener('selectionchange', (evt)=> {
+                var sel = window.getSelection();
+                var range = sel.getRangeAt(0);
+                popperRange.setRange(range);
+                popperRange.callback = ({width}) => {
+                    if(width > 0){
+                        checkNUpdatePopperContent.call(this, range, popperDiv, popperInstance);
+                        popperInstance.scheduleUpdate();    
+                    } else{
+                        setTimeout(()=> {
+                            popperDiv.classList.add('__del-hide');
+                        }, 300);
+                    }
+                    
+                };
+            });
+        }
+    }
+    function openEditLinkDialog(anchor, popperEditLink){
+        if(anchor && popperEditLink){
+            var dialogRef = new DialogService();
+            dialogRef.openDialog({templateId:'__delshift-anchor-change', attached: attachEditLinkElem, softClose: true})
+                .then(response=> {
+                    if(response.data){
+                        for(var i in response.data){
+                            anchor.setAttribute(i, response.data[i]);
+                        }
+                    }
+                })
+            .catch(error => {
+                console.error("DIALOG SERVICE >> ", error);
+            });
+        }
+    }
+    function attachEditLinkElem(modalElem){
+        if(modalElem){
+            var refElems = modalElem.querySelectorAll('[ref]');
+            if(refElems.length){
+                for(var i=0; i< refElems.length; i++){
+                    this[refElems[i].getAttribute('ref')] = refElems[i];
+                }
+            }
+            if(this.heading){
+                this.heading.innerText = 'Loading directory map!';
+                getDirectoryMap()
+                .then(response => {
+                    this.heading.innerText = 'Select a link Or enter URL';
+                    if(response.status && response.status == 'OK'){
+                        var data = response.data || {};
+                        if(Object.keys(data).length){
+                            generateLinkGallery.call(this, data);
+                            var galleryLinks = this.modalElem.querySelectorAll('.__delshift-gallery-item a');
+                            for(var k=0; k< galleryLinks.length; k++){
+                                galleryLinks[k].addEventListener('click', (e)=> {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    this.closeDialog({href: e.target.getAttribute('href')});
+                                });
+                            }
+                            if(this.doneBtn && this.customUrl){
+                                this.doneBtn.addEventListener('click', (e)=> {
+                                    if(this.customUrl.value && this.customUrl.value.length && this.customUrl.value.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g)){
+                                        this.closeDialog({href: this.customUrl.value});
+                                    } else{
+                                        alert("Please enter an external URL!");
+                                    }
+                                });
+                            }
+                        }
+                    }
+                })
+                .catch((err)=>{
+                    console.error("Error fetching directory map for the project");
+                });
+            }
+        }
+    }
+    function checkNUpdatePopperContent(range, popperDiv, popperInstance){
+        if(range && (range instanceof Range) && popperDiv && this.editLink){
+            var commonNode = range.commonAncestorContainer.parentNode;
+            if(commonNode && commonNode.closest('a') && !commonNode.closest('.__delshift-action-allowed')){
+                this.editLink.__delTarget = commonNode.closest('a');
+                popperDiv.classList.remove('__del-hide');
+            } else{
+                popperDiv.classList.add('__del-hide');
+            }
+        } else{
+            popperDiv.classList.add('__del-hide');
+        }
     }
     function attachImageModalElems(modalElem){
         if(modalElem){
@@ -53,12 +159,12 @@
             }
         }
     }
-    function filterImages(dirMap, baseUrl){
+    function filterImages(dirMap, baseUrl, regex){
         var op = [];
         if(dirMap && typeof(dirMap) =='object' && dirMap.dir){
             if(dirMap.values && dirMap.values.length){
                 dirMap.values.forEach(_dir => {
-                    var _op = filterImages(_dir, dirMap.baseUrl);
+                    var _op = filterImages(_dir, dirMap.baseUrl, regex);
                     if(_op){
                         if(_op.constructor == Array){
                             op = [...op, ..._op];
@@ -70,7 +176,7 @@
                 });
             }
             return op;
-        } else if(typeof(dirMap) == 'string' && imageRegex.test(dirMap)){
+        } else if(typeof(dirMap) == 'string' && regex.test(dirMap)){
             return {
                 path: `${baseUrl}/${dirMap}`,
                 fileName: dirMap
@@ -79,10 +185,24 @@
             return;
         }
     }
+    function generateLinkGallery(dirData){
+        if(this.galleryLinks){
+            this.galleryLinks.innerHTML = '';
+            var pages = filterImages(dirData, undefined, htmlRegex);
+            if(pages.length){
+                pages.forEach(page => {
+                    var liElem = document.createElement('li');
+                    liElem.classList.add('__delshift-gallery-item');
+                    liElem.innerHTML = `<a style="color: #66ccff;" href="${page.path}"><i class="far fa-file"></i><br/>${page.fileName}</a>`;
+                    this.galleryLinks.appendChild(liElem);
+                });
+            }
+        }
+    }
     function generateGallery(dirData){
         if(this.galleryImages){
             this.galleryImages.innerHTML = '';
-            var images = filterImages(dirData);
+            var images = filterImages(dirData, undefined, imageRegex);
             if(images.length){
                 images.forEach(image => {
                     var liElem = document.createElement('li');
@@ -158,7 +278,9 @@
                         }
                         editables[i].addEventListener('blur', e=> {
                             if(e.target){
-                                e.target.removeAttribute('contenteditable');
+                                setTimeout(()=> {
+                                    e.target.removeAttribute('contenteditable');
+                                }, 100);
                             }
                         });    
                     }                
@@ -184,7 +306,7 @@
                 e.preventDefault();
                 e.stopPropagation();
                 // check if there an image which is getting under the anchor and open image edit
-                checkForImagesInside(e.target);
+                // checkForImagesInside(e.target);
             }
         },{capture: true});
 
