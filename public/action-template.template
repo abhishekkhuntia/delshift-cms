@@ -92,10 +92,13 @@
     .__delshift-gallery-item{
         height: auto;
         width: 100px;
+        text-align: center;
         display: inline-block;
+        font-family: sans-serif;
         list-style: none;
         margin: 10px;
         cursor: pointer;
+        padding: 10px;
     }
     .__delshift-gallery-item:hover{
         box-shadow: 0 0 5px #484848;
