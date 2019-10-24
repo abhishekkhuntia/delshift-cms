@@ -1,6 +1,6 @@
 {
   "name": "delshift-inline-cms",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Inline CMS for editing pages - backend",
   "main": "server.js",
   "scripts": {
