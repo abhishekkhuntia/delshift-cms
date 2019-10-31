@@ -1,9 +1,11 @@
 {
   "name": "delshift-inline-cms",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Inline CMS for editing pages - backend",
   "main": "server.js",
   "scripts": {
+    "preinstall": "node build/npm/preinstall.js",
+    "postinstall": "node build/npm/postinstall.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
@@ -21,5 +23,12 @@
     "cheerio": "^1.0.0-rc.3",
     "express": "^4.17.1",
     "open": "^6.4.0"
+  },
+  "config": {
+    "unsafe-perm": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abhishekkhuntia/delshift-cms.git"
   }
 }
