@@ -9,7 +9,6 @@ const ROUTES = {
 }
 function apiHandler(req, res, next){
     let requestPath = req.params[0];
-    console.log("API -> ", requestPath);
     let routeObj = getRoutesMatchingHandler(requestPath, ROUTES);
     if(routeObj && typeof(routeObj.handler) == 'function'){
         routeObj.handler(req, res, next);

@@ -6,7 +6,6 @@ const fs = require('fs');
 let cwdFolder = process.cwd();
 
 function getPagesList(req, res, next){
-    console.log("getPagesList called !!! >>");
     if(req.method && req.method == appConstant.METHODS.GET){
         if(cwdFolder && fs.existsSync(cwdFolder)){
             if(fs.statSync(cwdFolder).isDirectory()){
