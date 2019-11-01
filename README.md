@@ -17,4 +17,4 @@ Just install it using:
   6. **Saving Content **:  There exists an option at bottom right, this button upon click will ask you to confirm about saving the page.  Upon accepting it, it will change the content of the file for you.
   > Note: Creation of new links isn't supported as such. But it shall be available once there is WYSWYG editor.
 
-See [product page](https://https://sites.google.com/view/delshiftinline/home)
+See [product page](https://sites.google.com/view/delshiftinline/home)
