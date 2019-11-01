@@ -16,3 +16,5 @@ Just install it using:
   5. **Link Change**: Once you enable content edit as mentioned above, simply select some text. If it an existing anchor, it will show a popup option to change link. Upon clicking on the option, it will open a dialog with two options of giving external URLs like https://www.google.com or you can select any internal page, irrespective of the location of the page in the folder.
   6. **Saving Content **:  There exists an option at bottom right, this button upon click will ask you to confirm about saving the page.  Upon accepting it, it will change the content of the file for you.
   > Note: Creation of new links isn't supported as such. But it shall be available once there is WYSWYG editor.
+
+See [product page](https://https://sites.google.com/view/delshiftinline/home)
